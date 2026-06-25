@@ -177,20 +177,10 @@ Full interactive API docs: [https://watchwise-api.onrender.com/docs](https://wat
 ## 👨‍💻 Author
 
 **Aniket Kumar Singh**  
-B.Tech CSE (AI/ML) — VIT Bhopal University (2024–2028)
+B.Tech CSE  — VIT Bhopal University (2024–2028)
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat&logo=linkedin)](https://linkedin.com/in/your-linkedin)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat&logo=linkedin)](https://www.linkedin.com/in/aniket-kumar-singh-b12486330)
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=flat&logo=github)](https://github.com/ANIKET640-a11y)
 [![LeetCode](https://img.shields.io/badge/LeetCode-Anikett666-FFA116?style=flat&logo=leetcode)](https://leetcode.com/Anikett666)
 
 ---
-
-## ⭐ Show Your Support
-
-If you found this project helpful, please consider giving it a ⭐ on GitHub — it means a lot!
-
----
-
-<div align="center">
-Built with ❤️ by Aniket Kumar Singh
-</div>
