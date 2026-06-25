@@ -689,12 +689,12 @@ PROVIDER_ID_MAP = {
 }
 
 @app.get("/movie/{tmdb_id}/watch-link")
-async def get_watch_link(tmdb_id: int, platform: str = Query(...)):
+async def get_watch_link(tmdb_id: int, platform: str = Query(...), title: Optional[str] = Query(None)):
     """
-    Returns the exact streaming platform deep-link ONLY if the movie is
+    Returns the exact streaming platform search/deep-link ONLY if the movie is
     confirmed available on that platform via TMDB. Returns 404 if not found.
     """
-    provider_id = PROVIDER_ID_MAP.get(platform)
+    provider_id = PROVIDER_ID_MAP.get(platform.lower())
     if not provider_id:
         raise HTTPException(status_code=400, detail=f"Unknown platform: {platform}")
 
@@ -702,11 +702,11 @@ async def get_watch_link(tmdb_id: int, platform: str = Query(...)):
         data = await tmdb_get(f"/movie/{tmdb_id}/watch/providers", {"language": "en-US"})
         results = data.get("results", {})
 
+        is_available = False
+        link = ""
         for region in ["IN", "US"] + list(results.keys()):
             region_data = results.get(region, {})
-            link = region_data.get("link")
-            if not link:
-                continue
+            link = region_data.get("link") or link
             all_providers = (
                 region_data.get("flatrate", []) +
                 region_data.get("buy", []) +
@@ -715,10 +715,30 @@ async def get_watch_link(tmdb_id: int, platform: str = Query(...)):
             )
             provider_ids = [p.get("provider_id") for p in all_providers]
             if provider_id in provider_ids:
-                return {"url": link, "source": "tmdb_direct", "available": True}
+                is_available = True
+                break
 
-        # NOT available on this platform — return explicit not-available
-        raise HTTPException(status_code=404, detail="Not available on this platform")
+        if not is_available:
+            raise HTTPException(status_code=404, detail="Not available on this platform")
+
+        # Fetch title if not passed
+        if not title:
+            movie_data = await tmdb_get(f"/movie/{tmdb_id}", {"language": "en-US"})
+            title = movie_data.get("title", "")
+
+        import urllib.parse
+        title_esc = urllib.parse.quote(title)
+        search_urls = {
+            "netflix": f"https://www.netflix.com/search?q={title_esc}",
+            "prime": f"https://www.amazon.com/s?k={title_esc}&i=instant-video",
+            "disney": f"https://www.disneyplus.com/search/{title_esc}",
+            "apple": f"https://tv.apple.com/search?term={title_esc}",
+            "hbo": f"https://www.max.com/search?q={title_esc}",
+            "hulu": f"https://www.hulu.com/search?q={title_esc}",
+            "paramount": f"https://www.paramountplus.com/search/{title_esc}/",
+        }
+        url = search_urls.get(platform.lower(), link or "#")
+        return {"url": url, "source": "tmdb_direct", "available": True}
 
     except HTTPException:
         raise
@@ -736,6 +756,13 @@ async def get_watch_providers(tmdb_id: int):
     try:
         data = await tmdb_get(f"/movie/{tmdb_id}/watch/providers", {"language": "en-US"})
         results = data.get("results", {})
+
+        # Fetch movie title to construct deep-links
+        movie_data = await tmdb_get(f"/movie/{tmdb_id}", {"language": "en-US"})
+        title = movie_data.get("title", "")
+
+        import urllib.parse
+        title_esc = urllib.parse.quote(title)
 
         # Reverse map: provider_id -> our platform key
         id_to_platform = {v: k for k, v in PROVIDER_ID_MAP.items()}
@@ -759,7 +786,17 @@ async def get_watch_providers(tmdb_id: int):
                     pid = provider.get("provider_id")
                     key = id_to_platform.get(pid)
                     if key and key not in confirmed:
-                        confirmed[key] = {"url": link, "type": label, "region": region}
+                        search_urls = {
+                            "netflix": f"https://www.netflix.com/search?q={title_esc}",
+                            "prime": f"https://www.amazon.com/s?k={title_esc}&i=instant-video",
+                            "disney": f"https://www.disneyplus.com/search/{title_esc}",
+                            "apple": f"https://tv.apple.com/search?term={title_esc}",
+                            "hbo": f"https://www.max.com/search?q={title_esc}",
+                            "hulu": f"https://www.hulu.com/search?q={title_esc}",
+                            "paramount": f"https://www.paramountplus.com/search/{title_esc}/",
+                        }
+                        url = search_urls.get(key, link)
+                        confirmed[key] = {"url": url, "type": label, "region": region}
 
             # Stop as soon as we have at least one result from a preferred region
             if confirmed and region in ("IN", "US"):
@@ -803,6 +840,46 @@ async def home(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Home route failed: {e}")
+
+
+# ---------- DISCOVER BY STREAMING PROVIDER ----------
+@app.get("/discover/streaming", response_model=List[TMDBMovieCard])
+async def discover_streaming(
+    platform: str = Query(...),
+    page: int = Query(1, ge=1, le=500),
+    limit: int = Query(20, ge=1, le=40),
+):
+    """
+    Discover popular/trending movies available on a specific watch provider.
+    """
+    platform_lower = platform.lower()
+    provider_id = PROVIDER_ID_MAP.get(platform_lower)
+    if not provider_id:
+        raise HTTPException(status_code=400, detail=f"Unknown platform: {platform}")
+
+    params = {
+        "language": "en-US",
+        "sort_by": "popularity.desc",
+        "page": page,
+        "with_watch_providers": provider_id,
+        "watch_region": "IN",
+    }
+
+    try:
+        discover = await tmdb_get("/discover/movie", params)
+        results = discover.get("results", [])
+
+        # Fallback to US region if IN has no results
+        if not results:
+            params["watch_region"] = "US"
+            discover = await tmdb_get("/discover/movie", params)
+            results = discover.get("results", [])
+
+        return await tmdb_cards_from_results(results, limit=limit)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Streaming discover failed: {e}")
 
 
 # ---------- TMDB KEYWORD SEARCH (MULTIPLE RESULTS) ----------

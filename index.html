@@ -4013,16 +4013,16 @@ let currentPlatform = 'netflix';
 // Cache so we don't re-fetch the same movie+platform combo
 const watchLinkCache = {};
 
-async function fetchWatchLink(tmdbId, platform) {
+async function fetchWatchLink(tmdbId, platform, title) {
   const key = `${tmdbId}:${platform}`;
   if (watchLinkCache[key]) return watchLinkCache[key];
   try {
-    const data = await apiFetch(`/movie/${tmdbId}/watch-link`, { platform });
+    const data = await apiFetch(`/movie/${tmdbId}/watch-link`, { platform, title: title || '' });
     watchLinkCache[key] = data.url || '#';
   } catch(e) {
     // Fallback to platform search if backend fails
     const cfg = PLATFORM_CONFIG[platform];
-    watchLinkCache[key] = cfg && cfg.watchUrl ? cfg.watchUrl('') : '#';
+    watchLinkCache[key] = cfg && cfg.watchUrl ? cfg.watchUrl(title || '') : '#';
   }
   return watchLinkCache[key];
 }
@@ -4030,7 +4030,7 @@ async function fetchWatchLink(tmdbId, platform) {
 async function openWatchLink(tmdbId, platform, title) {
   const btn = document.getElementById(`watch-btn-${tmdbId}`);
   if (btn) { btn.textContent = '⏳ Loading…'; btn.style.pointerEvents = 'none'; }
-  const url = await fetchWatchLink(tmdbId, platform);
+  const url = await fetchWatchLink(tmdbId, platform, title);
   if (btn) { btn.textContent = '▶ Watch Now ↗'; btn.style.pointerEvents = ''; }
   window.open(url, '_blank', 'noopener');
 }
@@ -4069,15 +4069,8 @@ async function loadStreamingByPlatform(platformKey) {
   `).join('');
   document.getElementById('platformLabel').textContent = cfg.label;
   try {
-    // Use TMDB discover with watch_providers
-    const url = new URL('https://api.themoviedb.org/3/discover/movie');
-    // Fetch movies available on this streaming platform via TMDB discover
-    // We pass the watch_provider ID through our /home endpoint category trick;
-    // for real provider filtering add /streaming/{provider_id} route in FastAPI.
-    // Using now_playing/popular rotated per platform as a meaningful approximation:
-    const catMap = {netflix:'popular', prime:'trending', disney:'top_rated', apple:'upcoming', hbo:'popular', hulu:'now_playing', paramount:'top_rated'};
-    const cat = catMap[platformKey] || 'popular';
-    const data = await apiFetch('/home', { category: cat, limit: 20 });
+    // Fetch movies available on this streaming platform via TMDB discover endpoint in FastAPI
+    const data = await apiFetch('/discover/streaming', { platform: platformKey, limit: 20 });
     strip.innerHTML = data.map(makeStreamCard).join('');
   } catch(e) {
     strip.innerHTML = `<p style="color:var(--muted);padding:20px;">Could not load streaming data.</p>`;
@@ -4186,10 +4179,17 @@ function openShowtimes(encodedData) {
   // Build header
   const runtime = movie.runtime ? `${Math.floor(movie.runtime/60)}h ${movie.runtime%60}m` : '';
   const year = (movie.release_date || '').slice(0,4);
+  const googleShowtimesUrl = `https://www.google.com/search?q=${encodeURIComponent(movie.title + ' showtimes')}`;
   $('stHeader').innerHTML = `
     ${movie.poster_url ? `<img class="showtime-header-poster" src="${movie.poster_url}" alt="${movie.title}">` : ''}
     <div class="showtime-header-info">
-      <div class="showtime-header-title">${movie.title}</div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div class="showtime-header-title">${movie.title}</div>
+        <a href="${googleShowtimesUrl}" target="_blank" rel="noopener" class="st-google-link-btn" 
+           style="background:var(--gold);color:#000;font-size:0.75rem;padding:4px 10px;border-radius:20px;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:4px;margin-bottom:4px;box-shadow:0 2px 8px rgba(245,197,24,0.3);transition:transform 0.15s;">
+          🎟 Book Tickets ↗
+        </a>
+      </div>
       <div class="showtime-header-meta">
         ${year ? `<span>${year}</span><span class="st-meta-sep">·</span>` : ''}
         ${runtime ? `<span>${runtime}</span><span class="st-meta-sep">·</span>` : ''}
@@ -4298,11 +4298,15 @@ function bookShowtime(title, time, cinema, format) {
   toast.innerHTML = `
     <div class="st-book-toast-icon">🎟</div>
     <div>
-      <div style="font-weight:800;font-size:0.84rem;">${time} · ${format}</div>
-      <div style="font-weight:500;font-size:0.72rem;color:#555;margin-top:1px;">${cinema}</div>
+      <div style="font-weight:800;font-size:0.84rem;">Opening booking link…</div>
+      <div style="font-weight:500;font-size:0.72rem;color:#555;margin-top:1px;">${cinema} · ${time}</div>
     </div>`;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3500);
+
+  // Link to Google to search showtimes for this movie at this specific cinema
+  const query = `${title} showtimes ${cinema} ${time}`;
+  window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank', 'noopener');
 }
 
 function closeShowtimes() {
