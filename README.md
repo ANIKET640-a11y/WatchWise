@@ -1,4 +1,4 @@
-# 🎬 WatchWise — AI-Powered Movie Discovery Platform
+# 🎬 WatchWise — Movie Discovery Platform
 
 <div align="center">
 
