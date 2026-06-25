@@ -6,3 +6,4 @@ __pycache__/
 AndroidFileTransfer.dmg
 drive-download-*
 sample_data/
+.DS_Store
