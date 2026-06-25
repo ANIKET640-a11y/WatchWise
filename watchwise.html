@@ -953,17 +953,107 @@
     .celeb-strip { grid-template-columns: repeat(5, 1fr); }
     .featured-grid { grid-template-columns: 1fr 1fr; }
     .detail-layout { grid-template-columns: 180px 1fr; gap: 22px; }
+    .hero-section {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+    .hero-queue { display: none; }
+    .hero-main { height: 380px; }
+    .celeb-detail-hero { grid-template-columns: 200px 1fr; }
+    .celeb-detail-hero > :last-child { display: none; }
   }
   @media (max-width: 640px) {
-    nav { padding: 0 14px; }
-    .nav-links { display: none; }
-    .nav-search-wrap { width: 100%; }
-    main { padding: 0 14px 40px; }
-    .top10-strip { grid-template-columns: repeat(3, 1fr); }
-    .celeb-strip { grid-template-columns: repeat(5, 1fr); }
+    /* Navbar */
+    nav {
+      padding: 0 12px;
+      height: auto;
+      min-height: 52px;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    .nav-logo { font-size: 1.4rem; margin-right: 10px; padding: 3px 8px; }
+    .nav-links {
+      display: flex;
+      gap: 0;
+      order: 3;
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+    }
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-link { font-size: 0.78rem; padding: 4px 10px; white-space: nowrap; }
+    .nav-search-wrap { width: auto; flex: 1; min-width: 0; }
+    #searchInput { font-size: 0.82rem; }
+
+    /* Layout */
+    main { padding: 0 12px 40px; }
+
+    /* Hero */
+    .hero-section {
+      grid-template-columns: 1fr;
+      height: auto;
+      border-radius: 8px;
+      margin: 12px 0 0;
+    }
+    .hero-queue { display: none; }
+    .hero-main { height: 260px; }
+    .hero-poster-thumb { width: 60px; bottom: 56px; left: 12px; }
+    .hero-info { padding: 12px 12px 14px 82px; gap: 10px; }
+    .hero-play-btn { width: 40px; height: 40px; font-size: 1rem; }
+    .hero-movie-title { font-size: 1.1rem; }
+    .hero-sub { font-size: 0.72rem; }
+    .hero-arrow { width: 32px; height: 32px; font-size: 1rem; }
+    .hero-arrow.left { left: 8px; }
+    .hero-arrow.right { right: 8px; }
+
+    /* Top 10 */
+    .top10-strip { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .top10-rank { font-size: 2.8rem; }
+
+    /* Featured news */
     .featured-grid { grid-template-columns: 1fr; }
+
+    /* Section headers */
+    .section-header { margin: 28px 0 14px; gap: 10px; }
+    .section-title { font-size: 1.5rem; }
+    .see-all-btn { font-size: 0.72rem; padding: 4px 10px; }
+
+    /* Detail page */
     .detail-layout { grid-template-columns: 1fr; }
-    .cast-grid { grid-template-columns: repeat(5, 1fr); }
+    .detail-poster { max-width: 180px; }
+    .detail-title { font-size: 2rem; }
+    .detail-backdrop { height: 220px; }
+    .detail-meta-grid { max-width: 100%; }
+    .detail-overview { max-width: 100%; }
+    .trailer-wrap { max-width: 100%; }
+    .review-card { max-width: 100%; }
+
+    /* Cast */
+    .cast-grid { grid-template-columns: repeat(4, 1fr); gap: 16px 10px; }
+    .cast-img-wrap { width: 72px; height: 72px; }
+    .cast-name { font-size: 0.72rem; }
+    .cast-char { font-size: 0.65rem; }
+
+    /* Celebrity detail */
+    .celeb-detail-hero {
+      grid-template-columns: 1fr;
+    }
+    .celeb-detail-photo { max-width: 200px; }
+    .celeb-detail-name { font-size: 2.2rem; }
+
+    /* Footer */
+    .footer-top { grid-template-columns: 1fr; padding: 36px 20px; }
+    .footer-bottom { padding: 16px 20px; flex-direction: column; align-items: flex-start; }
+
+    /* Category tabs */
+    .category-tabs { margin: 28px 0 16px; }
+    .cat-btn { font-size: 0.78rem; padding: 6px 14px; }
+
+    /* Movie grid */
+    .movie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
   }
 
   /* ===== ENTRY ANIMATION ===== */
