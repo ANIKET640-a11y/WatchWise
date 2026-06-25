@@ -954,10 +954,10 @@
     .featured-grid { grid-template-columns: 1fr 1fr; }
     .detail-layout { grid-template-columns: 180px 1fr; gap: 22px; }
     .hero-section {
-      grid-template-columns: 1fr;
-      height: auto;
+      grid-template-columns: 1fr !important;
+      height: auto !important;
     }
-    .hero-queue { display: none; }
+    .hero-queue { display: none !important; }
     .hero-main { height: 380px; }
     .celeb-detail-hero { grid-template-columns: 200px 1fr; }
     .celeb-detail-hero > :last-child { display: none; }
@@ -993,12 +993,12 @@
 
     /* Hero */
     .hero-section {
-      grid-template-columns: 1fr;
-      height: auto;
+      grid-template-columns: 1fr !important;
+      height: auto !important;
       border-radius: 8px;
       margin: 12px 0 0;
     }
-    .hero-queue { display: none; }
+    .hero-queue { display: none !important; }
     .hero-main { height: 260px; }
     .hero-poster-thumb { width: 60px; bottom: 56px; left: 12px; }
     .hero-info { padding: 12px 12px 14px 82px; gap: 10px; }
@@ -2317,7 +2317,7 @@
         </div>
       </div>
       <!-- QUEUE -->
-      <div class="hero-queue">
+      <div class="hero-queue" id="heroQueue">
         <div class="hero-queue-header">Up Next</div>
         <div class="hero-queue-list" id="heroQueueList"></div>
         <div class="hero-queue-browse">
