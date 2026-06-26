@@ -4,7 +4,7 @@
 
 ![WatchWise Banner](https://img.shields.io/badge/WatchWise-AI%20Movie%20Discovery-FFD700?style=for-the-badge&logo=filmstrip&logoColor=black)
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-watchwise--ai.netlify.app-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://watchwise-ai.netlify.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-watchwise--eight.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://watchwise-eight.vercel.app)
 [![Backend](https://img.shields.io/badge/API-watchwise--api.onrender.com-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://watchwise-api.onrender.com/docs)
 [![GitHub](https://img.shields.io/badge/GitHub-ANIKET640--a11y-181717?style=for-the-badge&logo=github)](https://github.com/ANIKET640-a11y/WatchWise)
 
@@ -16,7 +16,7 @@
 
 ## 🚀 Live Demo
 
-🌐 **Frontend:** [https://watchwise-ai.netlify.app](https://watchwise-ai.netlify.app)  
+🌐 **Frontend:** [https://watchwise-eight.vercel.app](https://watchwise-eight.vercel.app)  
 ⚙️ **API Docs:** [https://watchwise-api.onrender.com/docs](https://watchwise-api.onrender.com/docs)
 
 > ⚠️ The backend runs on Render's free tier and may take 30–60 seconds to wake up after inactivity.
@@ -62,7 +62,7 @@
 
 ### Deployment
 - **Render** — Backend (FastAPI) cloud deployment
-- **Netlify** — Frontend static site hosting with auto-deploy on push
+- **Vercel** — Frontend static site hosting with auto-deploy on push (using vercel.json)
 
 ---
 
@@ -168,9 +168,9 @@ Full interactive API docs: [https://watchwise-api.onrender.com/docs](https://wat
 - Build: `pip install -r requirements.txt`
 - Start: `uvicorn main:app --host 0.0.0.0 --port $PORT`
 
-### Frontend (Netlify)
-- Connected to GitHub for auto-deploy on every push to `main`
-- No build step required (pure HTML/CSS/JS)
+### Frontend (Vercel)
+- Connected to Vercel/GitHub for auto-deploy on every push to `main`
+- Configured via `vercel.json` to serve HTML pages statically and bypass Python dependencies
 
 ---
 
