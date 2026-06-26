@@ -7,3 +7,7 @@ AndroidFileTransfer.dmg
 drive-download-*
 sample_data/
 .DS_Store
+
+# Local Netlify folder
+.netlify
+.vercel

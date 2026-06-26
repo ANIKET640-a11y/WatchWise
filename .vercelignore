@@ -1,0 +1,20 @@
+# Ignore backend python files
+*.py
+*.pyc
+__pycache__/
+.venv/
+
+# Ignore big data and pickle files
+*.pkl
+*.csv
+*.zip
+*.dmg
+
+# Ignore Netlify and other config files
+.env
+.config/
+.netlify
+.netlifyignore
+.git/
+.gitignore
+README.md

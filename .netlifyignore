@@ -1,0 +1,18 @@
+# Ignore backend python files
+*.py
+*.pyc
+__pycache__/
+.venv/
+
+# Ignore big data and pickle files
+*.pkl
+*.csv
+*.zip
+*.dmg
+
+# Ignore other config files
+.env
+.config/
+.git/
+.gitignore
+README.md
