@@ -2899,7 +2899,7 @@ function wlUpdateBadge() {
   if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
   else badge.style.display = 'none';
 }
-function showWatchlist() {
+function showWatchlist(pushState = true) {
   navStack = [];
   $('homeView').style.display = 'none';
   $('detailView').style.display = 'none';
@@ -2909,6 +2909,12 @@ function showWatchlist() {
   $('watchlistView').style.display = 'block';
   renderWatchlist();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (pushState) {
+    window.history.pushState({}, '', '/watchlist');
+  }
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  const navWl = $('navWatchlist');
+  if (navWl) navWl.classList.add('active');
 }
 function renderWatchlist() {
   const list = wlLoad();
@@ -2958,7 +2964,7 @@ function clearWatchlist() {
   showToast('Watchlist cleared');
 }
 
-function goHome() {
+function goHome(pushState = true) {
   navStack = []; // clear stack when going home
   $('homeView').style.display = 'block';
   $('detailView').style.display = 'none';
@@ -2966,8 +2972,12 @@ function goHome() {
   $('watchlistView').style.display = 'none';
   $('genreView').style.display = 'none';
   $('awardsView').style.display = 'none';
-  window.history.pushState({}, '', window.location.pathname);
-  $('navHome').classList.add('active');
+  if (pushState) {
+    window.history.pushState({}, '', '/');
+  }
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  const navHome = $('navHome');
+  if (navHome) navHome.classList.add('active');
 }
 
 function showDetail() {
@@ -3120,7 +3130,7 @@ function switchCelebTab(btn, tab) {
 }
 
 // ===== CELEBRITY DETAIL =====
-async function loadCelebDetail(tmdbId, name) {
+async function loadCelebDetail(tmdbId, name, pushState = true) {
   // record what was visible before
   if ($('homeView').style.display !== 'none') navStack.push('home');
   else if ($('detailView').style.display !== 'none') navStack.push('movie');
@@ -3129,6 +3139,9 @@ async function loadCelebDetail(tmdbId, name) {
   $('detailView').style.display = 'none';
   $('celebDetailView').style.display = 'block';
   window.scrollTo({top:0,behavior:'smooth'});
+  if (pushState) {
+    window.history.pushState({}, '', `/celebrity/${tmdbId}`);
+  }
   $('celebDetailContent').innerHTML = `<div class="spinner-wrap"><div class="spinner"></div></div>`;
   try {
     // Try the backend proxy first; if not available, fallback to /people/{id}
@@ -3570,9 +3583,12 @@ async function loadMoreMovies() {
 }
 
 // ===== DETAIL PAGE =====
-async function loadDetails(tmdbId) {
+async function loadDetails(tmdbId, pushState = true) {
   showDetail();
   $('detailContent').innerHTML = `<div class="spinner-wrap"><div class="spinner"></div></div>`;
+  if (pushState) {
+    window.history.pushState({}, '', `/movie/${tmdbId}`);
+  }
   try {
     const data = await apiFetch(`/movie/id/${tmdbId}`);
     renderDetail(data);
@@ -4620,9 +4636,54 @@ function searchSelect(tmdbId, title) {
   loadDetails(tmdbId);
 }
 
+// ===== ROUTER & DEEP LINKING =====
+function handleRouting() {
+  const path = window.location.pathname;
+  
+  // Close navigation overlays
+  if (typeof closeMegaMenu === 'function') closeMegaMenu();
+  if (typeof closeDropdown === 'function') closeDropdown();
+  
+  if (path === '/' || path === '/index.html' || path === '/watchwise.html' || path === '/watchwise' || path === '') {
+    goHome(false);
+  } else if (path === '/watchlist') {
+    showWatchlist(false);
+  } else if (path.startsWith('/movie/')) {
+    const tmdbId = path.split('/')[2];
+    if (tmdbId) {
+      loadDetails(tmdbId, false);
+    } else {
+      goHome(false);
+    }
+  } else if (path.startsWith('/celebrity/') || path.startsWith('/celeb/')) {
+    const tmdbId = path.split('/')[2];
+    if (tmdbId) {
+      loadCelebDetail(tmdbId, '', false);
+    } else {
+      goHome(false);
+    }
+  } else if (path.startsWith('/genre/')) {
+    const genreName = decodeURIComponent(path.split('/')[2]);
+    if (genreName) {
+      openGenreView(genreName, false);
+    } else {
+      goHome(false);
+    }
+  } else if (path.startsWith('/awards/')) {
+    const awardKey = path.split('/')[2];
+    if (awardKey) {
+      openAwardsView(awardKey, false);
+    } else {
+      goHome(false);
+    }
+  } else {
+    goHome(false);
+  }
+}
+
 // ===== INIT =====
 window.addEventListener('popstate', () => {
-  goHome();
+  handleRouting();
 });
 
 
@@ -4667,7 +4728,7 @@ let genreCurrentName = '';
 let genreLoading = false;
 let genreAllCards = [];
 
-async function openGenreView(genreName) {
+async function openGenreView(genreName, pushState = true) {
   // hide all views
   $('homeView').style.display = 'none';
   $('detailView').style.display = 'none';
@@ -4676,6 +4737,9 @@ async function openGenreView(genreName) {
   $('awardsView').style.display = 'none';
   $('genreView').style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (pushState) {
+    window.history.pushState({}, '', `/genre/${encodeURIComponent(genreName)}`);
+  }
 
   genrePage = 1;
   genreCurrentName = genreName;
@@ -4904,7 +4968,7 @@ const AWARDS_DATA = {
   }
 };
 
-function openAwardsView(awardKey) {
+function openAwardsView(awardKey, pushState = true) {
   $('homeView').style.display = 'none';
   $('detailView').style.display = 'none';
   $('celebDetailView').style.display = 'none';
@@ -4912,6 +4976,9 @@ function openAwardsView(awardKey) {
   $('genreView').style.display = 'none';
   $('awardsView').style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (pushState) {
+    window.history.pushState({}, '', `/awards/${awardKey}`);
+  }
 
   const award = AWARDS_DATA[awardKey];
   if (!award) {
@@ -5049,6 +5116,8 @@ document.addEventListener('keydown', e => {
   loadBoxOffice();
   loadComingSoon();
   loadMovies('trending');
+  
+  handleRouting();
 })();
 </script>
 
